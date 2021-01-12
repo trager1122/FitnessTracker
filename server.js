@@ -1,17 +1,31 @@
+const express = require("express");
+const logger = require("morgan");
 const mongoose = require("mongoose");
 
-const Exercise = require("./models")
+const PORT = process.env.PORT || 3000;
 
-mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost/exerciseDB", { useNewUrlParser: true });
+const User = require("./exerciseModel.js");
+const app = express();
 
-const data = {
-  
-};
+app.use(logger("dev"));
 
-Example.create(data)
-  .then(dbExample => {
-    console.log(dbExample);
-  })
-  .catch(({ message }) => {
-    console.log(message);
-  });
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+
+app.use(express.static("public"));
+
+mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost/workout", { useNewUrlParser: true });
+
+app.post("/submit", ({ body }, res) => {
+  User.create(body)
+    .then(dbExercise => {
+      res.json(dbExercise);
+    })
+    .catch(err => {
+      res.json(err);
+    });
+});
+
+app.listen(PORT, () => {
+  console.log(`App running on port ${PORT}!`);
+});
