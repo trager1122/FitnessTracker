@@ -14,20 +14,34 @@ app.use(express.json());
 
 app.use(express.static("public"));
 
-mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost/workout", { useNewUrlParser: true });
+mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost/workouts", { useNewUrlParser: true });
 
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname + "./public/index.html"));
 });
 
-app.post("/submit", ({ body }, res) => {
-  Ex.create(body)
-    .then(dbExercise => {
-      res.json(dbExercise);
-    })
-    .catch(err => {
-      res.json(err);
-    });
+app.get("/exercise/api/workouts", ({ body }, res) => {
+  const ex = body;
+
+  db.workouts.find(ex, (error, last) => {
+      if (error) {
+        res.send(error);
+      } else {
+        res.send(last);
+      }
+  });
+});;
+
+app.post("/exercise/api/workouts", ({ body }, res) => {
+  const ex = body;
+
+  db.workouts.insert(ex, (error, created) => {
+    if (error) {
+      res.send(error);
+    } else {
+      res.send(created);
+    }
+  });
 });
 
 app.listen(PORT, () => {
