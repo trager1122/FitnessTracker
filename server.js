@@ -42,6 +42,18 @@ app.put("/api/workouts/:id",({body,params},res)=>{
   .then(workout=>(res.json(workout)))
 });
 
+app.get("/api/workouts/range",(req,res)=>{
+  Workout.find({}).limit(7)
+  .then(duration=>(db.workouts.aggregate([
+    {
+      $addFields:{
+        totalDuration: $sum($exercises.duration)
+      }
+    }
+  ])))
+  .then(res.json(duration))
+});
+
 
 
 app.listen(PORT, () => {
