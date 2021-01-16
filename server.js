@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 
 const PORT = process.env.PORT || 3000;
 
-const Ex = require("./models/workoutModel");
+const Workout = require("./models/workoutModel");
 const app = express();
 
 app.use(logger("dev"));
@@ -14,17 +14,17 @@ app.use(express.json());
 
 app.use(express.static("public"));
 
-mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost/workouts", { useNewUrlParser: true });
+mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost/workout", { useNewUrlParser: true });
 
 // API Routes
-app.get("/api/workouts", (req, res) => {
-  Workout.findAll(req, (error,all)=> {
-      if (error) {
-        console.log(error);
-      } else {
-        res.json(all);
-      }
-  })
+app.get("/exercise", (req, res) => {
+  Workout.find({})
+    .then(all => {
+      res.json(all);
+    })
+    .catch(err => {
+      res.json(err);
+    });  
 });
 
 app.post("/api/workouts", (req, res) => {
@@ -35,14 +35,15 @@ app.post("/api/workouts", (req, res) => {
     } else {
       res.send(created);
     }
+  })
 });
 
 app.put("/api/workouts/:id",({body,params},res)=>{
   Workout.findByIdAndUpdate(params.id,{$push:{exercises:body}},{runValidators: true})
-  .then(workout=>(res.json(workout)))
+  .then(w=>(res.json(w)))
 });
 
-app.get("/api/workouts/range",(req,res)=>{
+app.get("/stats",(req,res)=>{
   Workout.find({}).limit(7)
   .then(duration=>(db.workouts.aggregate([
     {
@@ -54,19 +55,17 @@ app.get("/api/workouts/range",(req,res)=>{
   .then(res.json(duration))
 });
 
-app.get("/api/workouts/range",(req,res)=>{
+app.get("/stats",(req,res)=>{
   Workout.find({}).limit(7)
-  .then(duration=>(db.workouts.aggregate([
+  .then(weight=>(db.workouts.aggregate([
     {
       $addFields:{
         totalWeight: $sum($exercises.weight)
       }
     }
   ])))
-  .then(res.json(duration))
+  .then(res.json(weight))
 });
-
-
 
 app.listen(PORT, () => {
   console.log(`App running on port ${PORT}!`);
