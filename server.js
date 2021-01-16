@@ -18,19 +18,18 @@ mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost/workouts", { us
 
 // API Routes
 app.get("/api/workouts", (req, res) => {
-  Workout.findOne().sort({ field: 'asc', day: -1 }).limit(1), (error,last)=> {
+  Workout.findAll(req, (error,all)=> {
       if (error) {
         console.log(error);
       } else {
-        res.json(last);
+        res.json(all);
       }
-  }
+  })
 });
 
-app.post("/api/workouts", ({ body }, res) => {
-  const ex = body;
+app.post("/api/workouts", (req, res) => {
 
-  Workout.insert(ex, (error, created) => {
+  Workout.create({}, (error, created) => {
     if (error) {
       res.send(error);
     } else {
@@ -38,11 +37,12 @@ app.post("/api/workouts", ({ body }, res) => {
     }
 });
 
-  // HTML Routes
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname + "./public/index.html"));
-  });
+app.put("/api/workouts/:id",({body,params},res)=>{
+  Workout.findByIdAndUpdate(params.id,{$push:{exercises:body}},{runValidators: true})
+  .then(workout=>(res.json(workout)))
 });
+
+
 
 app.listen(PORT, () => {
   console.log(`App running on port ${PORT}!`);
