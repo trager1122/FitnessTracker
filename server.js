@@ -22,7 +22,7 @@ var path=require("path");
 
 //Route for finding most recent workout
 app.get("/api/workouts", (req, res) => {
-  Workout.findOne({})
+  Workout.find({})
     .then(r => {
       res.json(r);
     })
