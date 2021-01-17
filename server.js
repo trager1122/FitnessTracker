@@ -16,36 +16,42 @@ app.use(express.static("public"));
 
 mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost/workout", { useNewUrlParser: true });
 
+var path=require("path");
+
 // API Routes
-app.get("/exercise", (req, res) => {
-  Workout.find({})
-    .then(all => {
-      res.json(all);
+
+//Route for finding most recent workout
+app.get("/api/workouts", (req, res) => {
+  Workout.findOne({})
+    .then(r => {
+      res.json(r);
     })
     .catch(err => {
       res.json(err);
     });  
 });
 
+//Route for creating a new workout
 app.post("/api/workouts", (req, res) => {
-
-  Workout.create({}, (error, created) => {
+  Workout.create({}, (error, c) => {
     if (error) {
       res.send(error);
     } else {
-      res.send(created);
+      res.send(c);
     }
   })
 });
 
+//Route for adding a new exercise to an existing workout
 app.put("/api/workouts/:id",({body,params},res)=>{
   Workout.findByIdAndUpdate(params.id,{$push:{exercises:body}},{runValidators: true})
   .then(w=>(res.json(w)))
 });
 
-app.get("/stats",(req,res)=>{
+//Route for finding total duration of last 7 workouts
+app.get("/api/workouts/range",(req,res)=>{
   Workout.find({}).limit(7)
-  .then(duration=>(db.workouts.aggregate([
+  .then(duration=>(workout.workouts.aggregate([
     {
       $addFields:{
         totalDuration: $sum($exercises.duration)
@@ -55,9 +61,10 @@ app.get("/stats",(req,res)=>{
   .then(res.json(duration))
 });
 
-app.get("/stats",(req,res)=>{
+//Route for finding total weight lifted during last 7 workouts
+app.get("/api/workouts/range",(req,res)=>{
   Workout.find({}).limit(7)
-  .then(weight=>(db.workouts.aggregate([
+  .then(weight=>(workout.workouts.aggregate([
     {
       $addFields:{
         totalWeight: $sum($exercises.weight)
@@ -65,6 +72,21 @@ app.get("/stats",(req,res)=>{
     }
   ])))
   .then(res.json(weight))
+});
+
+//HTML Routes
+
+app.get("/", (req,res)=>{
+  res.sendFile(path.join(__dirname, "./public/index.html"))
+});
+
+app.get("/exercise?" || "/exercise", (req,res)=>{
+  res.sendFile(path.join(__dirname, "./public/exercise.html"));
+});
+
+app.get("/stats",(req,res)=>{
+  res.sendFile(path.join(__dirname, "./public/stats.html"));
+
 });
 
 app.listen(PORT, () => {
