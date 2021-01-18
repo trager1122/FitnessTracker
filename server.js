@@ -55,7 +55,7 @@ app.post("/api/workouts", (req, res) => {
 
 //Route for adding a new exercise to an existing workout
 app.put("/api/workouts/:id",({body,params},res)=>{
-  Workout.Workout.findByIdAndUpdate(params.id,{$push:{exercises:body}},{runValidators: true})
+  Workout.Workout.findByIdAndUpdate(params.id,{$push:{exercises:body}},{new: true, runValidators: true})
   .then(w=>(res.json(w)))
 });
 
