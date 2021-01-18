@@ -57,6 +57,9 @@ app.post("/api/workouts", (req, res) => {
 app.put("/api/workouts/:id",({body,params},res)=>{
   Workout.Workout.findByIdAndUpdate(params.id,{$push:{exercises:body}},{new: true, runValidators: true})
   .then(w=>(res.json(w)))
+  .catch(err => {
+    res.json(err);
+  })
 });
 
 //Route for finding total duration of last 7 workouts
@@ -86,7 +89,6 @@ app.get("/exercise?" || "/exercise", (req,res)=>{
 
 app.get("/stats",(req,res)=>{
   res.sendFile(path.join(__dirname, "./public/stats.html"));
-
 });
 
 app.listen(PORT, () => {
