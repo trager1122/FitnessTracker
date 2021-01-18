@@ -10,18 +10,15 @@ const WorkoutSchema = new Schema({
     {
       type: {
         type: String,
-        required: "String is Required",
       },
 
       name: {
         type: String,
-        trim: true,
-        required: "String is Required",
+        trim: true
       },
 
       duration: {
-        type: Number,
-        required: "A duration is required",
+        type: Number
       },
 
       weight: {
@@ -45,4 +42,4 @@ const WorkoutSchema = new Schema({
 
 const Workout = mongoose.model("Workout", WorkoutSchema);
 
-module.exports = Workout;
+module.exports = {Workout};

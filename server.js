@@ -20,9 +20,16 @@ var path=require("path");
 
 // API Routes
 
-//Route for finding most recent workout
+//Route for finding all workouts
 app.get("/api/workouts", (req, res) => {
-  Workout.find({})
+  Workout.Workout.find({})
+  .then(duration=>(Workout.Workout.aggregate([
+    {
+      $addFields:{
+        totalDuration: {$sum:"$exercises.duration"}
+      }
+    }  
+  ])))
     .then(r => {
       res.json(r);
     })
@@ -33,7 +40,7 @@ app.get("/api/workouts", (req, res) => {
 
 //Route for creating a new workout
 app.post("/api/workouts", (req, res) => {
-  Workout.create({}, (error, c) => {
+  Workout.Workout.create({}, (error, c) => {
     if (error) {
       res.send(error);
     } else {
@@ -44,34 +51,23 @@ app.post("/api/workouts", (req, res) => {
 
 //Route for adding a new exercise to an existing workout
 app.put("/api/workouts/:id",({body,params},res)=>{
-  Workout.findByIdAndUpdate(params.id,{$push:{exercises:body}},{runValidators: true})
+  Workout.Workout.findByIdAndUpdate(params.id,{$push:{exercises:body}},{runValidators: true})
   .then(w=>(res.json(w)))
 });
 
 //Route for finding total duration of last 7 workouts
 app.get("/api/workouts/range",(req,res)=>{
-  Workout.find({}).limit(7)
-  .then(duration=>(workout.workouts.aggregate([
+  Workout.Workout.find({}).limit(7)
+  .then(duration=>(Workout.Workout.aggregate([
     {
       $addFields:{
-        totalDuration: $sum($exercises.duration)
+        totalDuration: {$sum:"$exercises.duration"}
       }
-    }
+    }  
   ])))
-  .then(res.json(duration))
-});
-
-//Route for finding total weight lifted during last 7 workouts
-app.get("/api/workouts/range",(req,res)=>{
-  Workout.find({}).limit(7)
-  .then(weight=>(workout.workouts.aggregate([
-    {
-      $addFields:{
-        totalWeight: $sum($exercises.weight)
-      }
-    }
-  ])))
-  .then(res.json(weight))
+  .then(data=>{
+    res.json(data)
+  })
 });
 
 //HTML Routes
